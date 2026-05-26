@@ -223,12 +223,15 @@ function generateCode() {
   return code;
 }
 
-function pickThemePair(usedIndices) {
-  const available = THEME_PAIRS.map((_, i) => i).filter(i => !usedIndices.includes(i));
-  if (available.length === 0) return THEME_PAIRS[Math.floor(Math.random() * THEME_PAIRS.length)];
+function pickThemePairFrom(themes, usedIndices) {
+  const available = themes.map((_, i) => i).filter(i => !usedIndices.includes(i));
+  if (available.length === 0) {
+    usedIndices.length = 0;
+    return themes[Math.floor(Math.random() * themes.length)];
+  }
   const idx = available[Math.floor(Math.random() * available.length)];
   usedIndices.push(idx);
-  return THEME_PAIRS[idx];
+  return themes[idx];
 }
 
 io.on('connection', (socket) => {
@@ -246,10 +249,13 @@ io.on('connection', (socket) => {
       totalRounds: 3,
       currentTurn: 0,
       themePair: null,
-      impostorId: null,
+      impostorIds: [],
       submissions: new Map(),
       votes: new Map(),
       usedThemeIndices: [],
+      doubleImpostor: false,
+      misterWhite: false,
+      customThemes: [],
     };
 
     lobbies.set(code, lobby);
@@ -277,6 +283,9 @@ io.on('connection', (socket) => {
     if (lobby.players.length < 3) return callback({ success: false, error: 'Il faut au moins 3 joueurs' });
 
     lobby.totalRounds = settings?.rounds || 3;
+    lobby.doubleImpostor = settings?.doubleImpostor || false;
+    lobby.misterWhite = settings?.misterWhite || false;
+    lobby.customThemes = settings?.customThemes || [];
     lobby.round = 0;
     lobby.usedThemeIndices = [];
     startNewRound(lobby);
@@ -385,22 +394,37 @@ function startNewRound(lobby) {
   lobby.votes = new Map();
   lobby.state = 'playing';
 
-  const pair = pickThemePair(lobby.usedThemeIndices);
+  const themes = lobby.customThemes.length > 0 ? lobby.customThemes : THEME_PAIRS;
+  const pair = pickThemePairFrom(themes, lobby.usedThemeIndices);
   lobby.themePair = pair;
 
-  const impostorIdx = Math.floor(Math.random() * lobby.players.length);
-  lobby.impostorId = lobby.players[impostorIdx].id;
+  const numImpostors = (lobby.doubleImpostor && lobby.players.length >= 6) ? 2 : 1;
+
+  const indices = lobby.players.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const impostorIndices = indices.slice(0, numImpostors);
+  lobby.impostorIds = impostorIndices.map(i => lobby.players[i].id);
 
   const shuffled = [...lobby.players].sort(() => Math.random() - 0.5);
   lobby.players = shuffled;
-  lobby.impostorId = lobby.players.find(p => p.id === lobby.impostorId)?.id || lobby.players[impostorIdx % lobby.players.length].id;
 
   lobby.players.forEach(player => {
-    const isImpostor = player.id === lobby.impostorId;
+    const isImpostor = lobby.impostorIds.includes(player.id);
+    let theme;
+    if (isImpostor && lobby.misterWhite) {
+      theme = '???';
+    } else if (isImpostor) {
+      theme = pair.impostor;
+    } else {
+      theme = pair.normal;
+    }
     io.to(player.id).emit('round-start', {
       round: lobby.round,
       totalRounds: lobby.totalRounds,
-      theme: isImpostor ? pair.impostor : pair.normal,
+      theme,
       currentTurn: 0,
       currentPlayerName: lobby.players[0].name,
       players: lobby.players.map(p => ({ id: p.id, name: p.name, score: p.score })),
@@ -424,15 +448,18 @@ function resolveVotes(lobby) {
     }
   }
 
-  const impostorFound = eliminated === lobby.impostorId;
+  const impostorIds = lobby.impostorIds;
+  const eliminatedIsImpostor = impostorIds.includes(eliminated);
 
-  if (impostorFound) {
+  if (eliminatedIsImpostor) {
     lobby.players.forEach(p => {
-      if (p.id !== lobby.impostorId) p.score += 1;
+      if (!impostorIds.includes(p.id)) p.score += 1;
     });
   } else {
-    const impostor = lobby.players.find(p => p.id === lobby.impostorId);
-    if (impostor) impostor.score += 2;
+    impostorIds.forEach(impId => {
+      const impostor = lobby.players.find(p => p.id === impId);
+      if (impostor) impostor.score += 2;
+    });
   }
 
   const voteDetails = [];
@@ -442,12 +469,15 @@ function resolveVotes(lobby) {
     if (voter && voted) voteDetails.push({ voter: voter.name, voted: voted.name });
   }
 
+  const impostorNames = impostorIds.map(id => lobby.players.find(p => p.id === id)?.name).filter(Boolean);
+
   lobby.state = 'results';
   io.to(lobby.code).emit('round-results', {
-    impostorName: lobby.players.find(p => p.id === lobby.impostorId)?.name,
-    impostorFound,
+    impostorNames,
+    impostorFound: eliminatedIsImpostor,
     eliminatedName: lobby.players.find(p => p.id === eliminated)?.name,
     themePair: lobby.themePair,
+    misterWhite: lobby.misterWhite,
     votes: voteDetails,
     scores: lobby.players.map(p => ({ name: p.name, score: p.score })),
     round: lobby.round,

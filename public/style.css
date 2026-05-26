@@ -337,6 +337,128 @@ select {
   margin-top: 16px;
 }
 
+.settings-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.custom-themes-section {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.custom-themes-section h3 {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.optional-tag {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.custom-theme-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.custom-theme-inputs input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.btn-add {
+  background: var(--primary);
+  color: white;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.custom-themes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.custom-theme-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.custom-theme-item .themes-text {
+  flex: 1;
+  color: var(--text-dim);
+}
+
+.custom-theme-item .themes-text strong {
+  color: var(--text);
+}
+
+.btn-remove-theme {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 4px;
+  width: auto;
+}
+
+.info-text-small {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.result-mode-info {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.mister-white-theme {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 /* GAME SCREEN */
 .game-header {
   display: flex;

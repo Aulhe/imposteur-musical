@@ -6,6 +6,7 @@ let isHost = false;
 let myName = null;
 let currentPlayers = [];
 let hasVoted = false;
+let customThemes = [];
 
 socket.on('connect', () => { myId = socket.id; });
 
@@ -33,6 +34,8 @@ document.getElementById('btn-do-create').addEventListener('click', () => {
     if (res.success) {
       lobbyCode = res.code;
       isHost = true;
+      customThemes = [];
+      renderCustomThemes();
       updateLobbyUI(res.lobby);
       showScreen('lobby');
     } else {
@@ -66,10 +69,55 @@ document.getElementById('btn-copy-code').addEventListener('click', () => {
   navigator.clipboard.writeText(lobbyCode).then(() => toast('Code copié !'));
 });
 
+// --- CUSTOM THEMES ---
+document.getElementById('btn-add-theme').addEventListener('click', addCustomTheme);
+document.getElementById('custom-theme-impostor').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addCustomTheme();
+});
+
+function addCustomTheme() {
+  const normalInput = document.getElementById('custom-theme-normal');
+  const impostorInput = document.getElementById('custom-theme-impostor');
+  const normal = normalInput.value.trim();
+  const impostor = impostorInput.value.trim();
+  if (!normal || !impostor) return;
+
+  customThemes.push({ normal, impostor });
+  normalInput.value = '';
+  impostorInput.value = '';
+  normalInput.focus();
+  renderCustomThemes();
+}
+
+function renderCustomThemes() {
+  const list = document.getElementById('custom-themes-list');
+  list.innerHTML = '';
+  customThemes.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'custom-theme-item';
+    div.innerHTML = `
+      <span class="themes-text"><strong>${esc(t.normal)}</strong> vs <strong>${esc(t.impostor)}</strong></span>
+      <button class="btn-remove-theme" data-index="${i}">✕</button>
+    `;
+    div.querySelector('.btn-remove-theme').addEventListener('click', () => {
+      customThemes.splice(i, 1);
+      renderCustomThemes();
+    });
+    list.appendChild(div);
+  });
+
+  const info = document.getElementById('custom-themes-info');
+  info.textContent = customThemes.length > 0
+    ? `${customThemes.length} thème(s) personnalisé(s) — seuls ceux-ci seront utilisés`
+    : 'Si vide, les thèmes par défaut seront utilisés';
+}
+
 // --- START GAME ---
 document.getElementById('btn-start-game').addEventListener('click', () => {
   const rounds = parseInt(document.getElementById('rounds-select').value);
-  socket.emit('start-game', lobbyCode, { rounds }, (res) => {
+  const doubleImpostor = document.getElementById('toggle-double-impostor').checked;
+  const misterWhite = document.getElementById('toggle-mister-white').checked;
+  socket.emit('start-game', lobbyCode, { rounds, doubleImpostor, misterWhite, customThemes }, (res) => {
     if (!res.success) showError('start-error', res.error || 'Erreur');
   });
 });
@@ -127,11 +175,20 @@ socket.on('round-start', (data) => {
   showScreen('game');
 
   document.getElementById('game-round').textContent = `Manche ${data.round}/${data.totalRounds}`;
-  document.getElementById('my-theme').textContent = data.theme;
   document.getElementById('submissions-list').innerHTML = '';
 
+  const themeEl = document.getElementById('my-theme');
+  const themeBox = document.getElementById('theme-reveal');
   document.getElementById('impostor-badge').style.display = 'none';
-  document.getElementById('theme-reveal').style.borderColor = 'var(--border)';
+  themeBox.style.borderColor = 'var(--border)';
+
+  if (data.theme === '???') {
+    themeEl.textContent = '???';
+    themeEl.className = 'theme-value mister-white-theme';
+  } else {
+    themeEl.textContent = data.theme;
+    themeEl.className = 'theme-value';
+  }
 
   updateTurnUI(data.currentTurn, data.currentPlayerName);
 });
@@ -271,16 +328,26 @@ function showVoteScreen(lobby) {
 function showResults(data) {
   showScreen('results');
 
+  const names = data.impostorNames;
+  const isSingle = names.length === 1;
   const revealEl = document.getElementById('result-reveal');
+
   if (data.impostorFound) {
     revealEl.className = 'result-reveal found';
-    revealEl.innerHTML = `<h3>✅ Imposteur démasqué !</h3><p><strong>${esc(data.impostorName)}</strong> était l'imposteur</p>`;
+    revealEl.innerHTML = `<h3>✅ Imposteur démasqué !</h3><p><strong>${esc(data.eliminatedName)}</strong> était ${isSingle ? "l'imposteur" : "un des imposteurs"}</p>`;
   } else {
     revealEl.className = 'result-reveal not-found';
-    revealEl.innerHTML = `<h3>❌ L'imposteur s'en sort !</h3><p><strong>${esc(data.impostorName)}</strong> était l'imposteur mais <strong>${esc(data.eliminatedName)}</strong> a été éliminé</p>`;
+    revealEl.innerHTML = `<h3>❌ ${isSingle ? "L'imposteur s'en sort" : "Les imposteurs s'en sortent"} !</h3><p><strong>${esc(data.eliminatedName)}</strong> a été éliminé mais ${isSingle ? "l'imposteur était" : "les imposteurs étaient"} <strong>${names.map(n => esc(n)).join(' & ')}</strong></p>`;
   }
 
-  document.getElementById('result-themes').innerHTML = `
+  const modeInfo = document.getElementById('result-mode-info');
+  if (data.misterWhite) {
+    modeInfo.textContent = '👻 Mode Mister White — l\'imposteur n\'avait aucun thème';
+  } else {
+    modeInfo.textContent = '';
+  }
+
+  const themesHtml = `
     <h4>Thèmes de la manche</h4>
     <div class="theme-row">
       <span>Thème normal</span>
@@ -288,9 +355,10 @@ function showResults(data) {
     </div>
     <div class="theme-row">
       <span>Thème imposteur</span>
-      <span style="color:var(--accent)">${esc(data.themePair.impostor)}</span>
+      <span style="color:var(--accent)">${data.misterWhite ? '??? (aucun)' : esc(data.themePair.impostor)}</span>
     </div>
   `;
+  document.getElementById('result-themes').innerHTML = themesHtml;
 
   const votesEl = document.getElementById('result-votes');
   votesEl.innerHTML = '<h4>Détail des votes</h4>' +

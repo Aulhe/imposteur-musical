@@ -72,6 +72,29 @@
             <option value="5">5 manches</option>
           </select>
         </div>
+
+        <div class="settings-toggles">
+          <label class="toggle-label">
+            <input type="checkbox" id="toggle-double-impostor">
+            <span class="toggle-text">2 imposteurs (6+ joueurs)</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggle-mister-white">
+            <span class="toggle-text">Mister White (imposteur sans thème)</span>
+          </label>
+        </div>
+
+        <div class="custom-themes-section">
+          <h3>Thèmes personnalisés <span class="optional-tag">(optionnel)</span></h3>
+          <div id="custom-themes-list" class="custom-themes-list"></div>
+          <div class="custom-theme-inputs">
+            <input type="text" id="custom-theme-normal" placeholder="Thème normal" maxlength="50" autocomplete="off">
+            <input type="text" id="custom-theme-impostor" placeholder="Thème imposteur" maxlength="50" autocomplete="off">
+            <button id="btn-add-theme" class="btn btn-small btn-add">+ Ajouter</button>
+          </div>
+          <p class="info-text-small" id="custom-themes-info">Si vide, les thèmes par défaut seront utilisés</p>
+        </div>
+
         <button id="btn-start-game" class="btn btn-primary btn-large">Lancer la partie</button>
         <p id="start-error" class="error"></p>
       </div>
@@ -127,6 +150,7 @@
   <div id="screen-results" class="screen">
     <div class="container">
       <div id="result-reveal" class="result-reveal"></div>
+      <div id="result-mode-info" class="result-mode-info"></div>
       <div id="result-themes" class="result-themes"></div>
       <div id="result-votes" class="result-votes"></div>
       <div id="result-scores" class="scores-table"></div>
