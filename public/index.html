@@ -101,20 +101,35 @@
             <input type="checkbox" id="toggle-mister-white">
             <span class="toggle-text">Mister White (imposteur sans thème)</span>
           </label>
-          <label class="toggle-label">
-            <input type="checkbox" id="toggle-custom-themes">
-            <span class="toggle-text">Thèmes personnalisés</span>
-          </label>
         </div>
 
-        <div id="custom-themes-section" class="custom-themes-section" style="display:none;">
-          <div id="custom-themes-list" class="custom-themes-list"></div>
-          <div class="custom-theme-inputs">
-            <input type="text" id="custom-theme-normal" placeholder="Thème normal" maxlength="50" autocomplete="off">
-            <input type="text" id="custom-theme-impostor" placeholder="Thème imposteur" maxlength="50" autocomplete="off">
-            <button id="btn-add-theme" class="btn btn-small btn-add">+ Ajouter</button>
+        <div class="categories-section">
+          <div class="categories-header">
+            <h3>Catégories de thèmes</h3>
+            <div class="categories-actions">
+              <button id="btn-select-all" class="btn btn-small">Tout</button>
+              <button id="btn-select-none" class="btn btn-small">Aucun</button>
+            </div>
           </div>
-          <p class="info-text-small" id="custom-themes-info">Ajoute au moins 1 paire de thèmes</p>
+          <div id="categories-grid" class="categories-grid"></div>
+          <p class="info-text-small" id="categories-info">Toutes sélectionnées par défaut</p>
+        </div>
+
+        <div class="custom-themes-section">
+          <div class="custom-themes-header">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggle-custom-themes">
+              <span class="toggle-text">Ajouter des thèmes perso</span>
+            </label>
+          </div>
+          <div id="custom-themes-body" style="display:none;">
+            <div id="custom-themes-list" class="custom-themes-list"></div>
+            <div class="custom-theme-inputs">
+              <input type="text" id="custom-theme-normal" placeholder="Thème normal" maxlength="50" autocomplete="off">
+              <input type="text" id="custom-theme-impostor" placeholder="Thème imposteur" maxlength="50" autocomplete="off">
+              <button id="btn-add-theme" class="btn btn-small btn-add">+ Ajouter</button>
+            </div>
+          </div>
         </div>
 
         <button id="btn-start-game" class="btn btn-primary btn-large">Lancer la partie</button>

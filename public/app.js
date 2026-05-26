@@ -7,8 +7,16 @@ let myName = null;
 let currentPlayers = [];
 let hasVoted = false;
 let customThemes = [];
+let categories = [];
+let selectedCategories = new Set();
 
 socket.on('connect', () => { myId = socket.id; });
+
+fetch('/api/categories').then(r => r.json()).then(cats => {
+  categories = cats;
+  selectedCategories = new Set(cats.map(c => c.id));
+  renderCategories();
+});
 
 // --- NAVIGATION ---
 function showScreen(id) {
@@ -77,9 +85,48 @@ document.getElementById('max-players-select').addEventListener('change', () => {
   }
 });
 
+// --- CATEGORIES ---
+document.getElementById('btn-select-all').addEventListener('click', () => {
+  selectedCategories = new Set(categories.map(c => c.id));
+  renderCategories();
+});
+document.getElementById('btn-select-none').addEventListener('click', () => {
+  selectedCategories.clear();
+  renderCategories();
+});
+
+function renderCategories() {
+  const grid = document.getElementById('categories-grid');
+  grid.innerHTML = '';
+  categories.forEach(cat => {
+    const selected = selectedCategories.has(cat.id);
+    const div = document.createElement('label');
+    div.className = 'category-item' + (selected ? ' selected' : '');
+    div.innerHTML = `
+      <input type="checkbox" ${selected ? 'checked' : ''} data-cat="${cat.id}">
+      <span class="cat-label">${cat.label}</span>
+      <span class="cat-count">${cat.count}</span>
+    `;
+    div.querySelector('input').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        selectedCategories.add(cat.id);
+      } else {
+        selectedCategories.delete(cat.id);
+      }
+      renderCategories();
+    });
+    grid.appendChild(div);
+  });
+  const total = categories.filter(c => selectedCategories.has(c.id)).reduce((s, c) => s + c.count, 0);
+  document.getElementById('categories-info').textContent =
+    selectedCategories.size === categories.length ? `Toutes sélectionnées (${total} thèmes)` :
+    selectedCategories.size === 0 ? 'Aucune catégorie — les thèmes par défaut seront utilisés' :
+    `${selectedCategories.size} catégorie(s) — ${total} thèmes`;
+}
+
 // --- TOGGLE CUSTOM THEMES ---
 document.getElementById('toggle-custom-themes').addEventListener('change', (e) => {
-  document.getElementById('custom-themes-section').style.display = e.target.checked ? 'block' : 'none';
+  document.getElementById('custom-themes-body').style.display = e.target.checked ? 'block' : 'none';
 });
 
 // --- CUSTOM THEMES ---
@@ -119,10 +166,6 @@ function renderCustomThemes() {
     list.appendChild(div);
   });
 
-  const info = document.getElementById('custom-themes-info');
-  info.textContent = customThemes.length > 0
-    ? `${customThemes.length} thème(s) personnalisé(s) — seuls ceux-ci seront utilisés`
-    : 'Si vide, les thèmes par défaut seront utilisés';
 }
 
 // --- START GAME ---
@@ -138,6 +181,7 @@ document.getElementById('btn-start-game').addEventListener('click', () => {
     numImpostors,
     misterWhite,
     customThemes: useCustomThemes ? customThemes : [],
+    selectedCategories: [...selectedCategories],
   }, (res) => {
     if (!res.success) showError('start-error', res.error || 'Erreur');
   });
