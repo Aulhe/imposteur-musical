@@ -130,15 +130,8 @@ socket.on('round-start', (data) => {
   document.getElementById('my-theme').textContent = data.theme;
   document.getElementById('submissions-list').innerHTML = '';
 
-  const badge = document.getElementById('impostor-badge');
-  const themeBox = document.getElementById('theme-reveal');
-  if (data.isImpostor) {
-    badge.style.display = 'block';
-    themeBox.style.borderColor = 'var(--accent)';
-  } else {
-    badge.style.display = 'none';
-    themeBox.style.borderColor = 'var(--border)';
-  }
+  document.getElementById('impostor-badge').style.display = 'none';
+  document.getElementById('theme-reveal').style.borderColor = 'var(--border)';
 
   updateTurnUI(data.currentTurn, data.currentPlayerName);
 });
