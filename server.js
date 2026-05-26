@@ -253,7 +253,8 @@ io.on('connection', (socket) => {
       submissions: new Map(),
       votes: new Map(),
       usedThemeIndices: [],
-      doubleImpostor: false,
+      maxPlayers: 8,
+      numImpostors: 1,
       misterWhite: false,
       customThemes: [],
     };
@@ -267,13 +268,19 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(code);
     if (!lobby) return callback({ success: false, error: 'Lobby introuvable' });
     if (lobby.state !== 'waiting') return callback({ success: false, error: 'Partie déjà en cours' });
-    if (lobby.players.length >= 10) return callback({ success: false, error: 'Lobby plein (max 10)' });
+    if (lobby.players.length >= lobby.maxPlayers) return callback({ success: false, error: `Lobby plein (max ${lobby.maxPlayers})` });
     if (lobby.players.some(p => p.name === playerName)) return callback({ success: false, error: 'Ce pseudo est déjà pris' });
 
     lobby.players.push({ id: socket.id, name: playerName, score: 0 });
     socket.join(code);
     io.to(code).emit('lobby-updated', sanitizeLobby(lobby));
     callback({ success: true, lobby: sanitizeLobby(lobby) });
+  });
+
+  socket.on('update-settings', (code, settings) => {
+    const lobby = lobbies.get(code);
+    if (!lobby || lobby.host !== socket.id || lobby.state !== 'waiting') return;
+    if (settings?.maxPlayers) lobby.maxPlayers = settings.maxPlayers;
   });
 
   socket.on('start-game', (code, settings, callback) => {
@@ -283,7 +290,8 @@ io.on('connection', (socket) => {
     if (lobby.players.length < 3) return callback({ success: false, error: 'Il faut au moins 3 joueurs' });
 
     lobby.totalRounds = settings?.rounds || 3;
-    lobby.doubleImpostor = settings?.doubleImpostor || false;
+    lobby.maxPlayers = settings?.maxPlayers || 8;
+    lobby.numImpostors = Math.min(settings?.numImpostors || 1, Math.floor(lobby.players.length / 2));
     lobby.misterWhite = settings?.misterWhite || false;
     lobby.customThemes = settings?.customThemes || [];
     lobby.round = 0;
@@ -398,7 +406,7 @@ function startNewRound(lobby) {
   const pair = pickThemePairFrom(themes, lobby.usedThemeIndices);
   lobby.themePair = pair;
 
-  const numImpostors = (lobby.doubleImpostor && lobby.players.length >= 6) ? 2 : 1;
+  const numImpostors = Math.min(lobby.numImpostors, Math.floor(lobby.players.length / 2));
 
   const indices = lobby.players.map((_, i) => i);
   for (let i = indices.length - 1; i > 0; i--) {

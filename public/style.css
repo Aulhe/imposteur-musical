@@ -337,6 +337,17 @@ select {
   margin-top: 16px;
 }
 
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.settings-grid .form-group {
+  margin-bottom: 0;
+}
+
 .settings-toggles {
   display: flex;
   flex-direction: column;

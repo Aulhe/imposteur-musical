@@ -69,6 +69,19 @@ document.getElementById('btn-copy-code').addEventListener('click', () => {
   navigator.clipboard.writeText(lobbyCode).then(() => toast('Code copié !'));
 });
 
+// --- MAX PLAYERS UPDATE ---
+document.getElementById('max-players-select').addEventListener('change', () => {
+  if (lobbyCode) {
+    const maxPlayers = parseInt(document.getElementById('max-players-select').value);
+    socket.emit('update-settings', lobbyCode, { maxPlayers });
+  }
+});
+
+// --- TOGGLE CUSTOM THEMES ---
+document.getElementById('toggle-custom-themes').addEventListener('change', (e) => {
+  document.getElementById('custom-themes-section').style.display = e.target.checked ? 'block' : 'none';
+});
+
 // --- CUSTOM THEMES ---
 document.getElementById('btn-add-theme').addEventListener('click', addCustomTheme);
 document.getElementById('custom-theme-impostor').addEventListener('keydown', (e) => {
@@ -115,9 +128,17 @@ function renderCustomThemes() {
 // --- START GAME ---
 document.getElementById('btn-start-game').addEventListener('click', () => {
   const rounds = parseInt(document.getElementById('rounds-select').value);
-  const doubleImpostor = document.getElementById('toggle-double-impostor').checked;
+  const maxPlayers = parseInt(document.getElementById('max-players-select').value);
+  const numImpostors = parseInt(document.getElementById('impostors-select').value);
   const misterWhite = document.getElementById('toggle-mister-white').checked;
-  socket.emit('start-game', lobbyCode, { rounds, doubleImpostor, misterWhite, customThemes }, (res) => {
+  const useCustomThemes = document.getElementById('toggle-custom-themes').checked;
+  socket.emit('start-game', lobbyCode, {
+    rounds,
+    maxPlayers,
+    numImpostors,
+    misterWhite,
+    customThemes: useCustomThemes ? customThemes : [],
+  }, (res) => {
     if (!res.success) showError('start-error', res.error || 'Erreur');
   });
 });
