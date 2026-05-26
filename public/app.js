@@ -78,9 +78,9 @@ document.getElementById('btn-copy-code').addEventListener('click', () => {
 });
 
 // --- MAX PLAYERS UPDATE ---
-document.getElementById('max-players-select').addEventListener('change', () => {
+document.getElementById('max-players-input').addEventListener('change', () => {
   if (lobbyCode) {
-    const maxPlayers = parseInt(document.getElementById('max-players-select').value);
+    const maxPlayers = parseInt(document.getElementById('max-players-input').value) || 8;
     socket.emit('update-settings', lobbyCode, { maxPlayers });
   }
 });
@@ -170,9 +170,9 @@ function renderCustomThemes() {
 
 // --- START GAME ---
 document.getElementById('btn-start-game').addEventListener('click', () => {
-  const rounds = parseInt(document.getElementById('rounds-select').value);
-  const maxPlayers = parseInt(document.getElementById('max-players-select').value);
-  const numImpostors = parseInt(document.getElementById('impostors-select').value);
+  const rounds = parseInt(document.getElementById('rounds-input').value) || 3;
+  const maxPlayers = parseInt(document.getElementById('max-players-input').value) || 8;
+  const numImpostors = parseInt(document.getElementById('impostors-input').value) || 1;
   const misterWhite = document.getElementById('toggle-mister-white').checked;
   const useCustomThemes = document.getElementById('toggle-custom-themes').checked;
   socket.emit('start-game', lobbyCode, {

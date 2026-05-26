@@ -65,34 +65,16 @@
       <div id="lobby-host-controls" class="host-controls" style="display:none;">
         <div class="settings-grid">
           <div class="form-group">
-            <label for="rounds-select">Manches</label>
-            <select id="rounds-select">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-            </select>
+            <label for="rounds-input">Manches</label>
+            <input type="number" id="rounds-input" value="3" min="1" max="50" autocomplete="off">
           </div>
           <div class="form-group">
-            <label for="max-players-select">Joueurs max</label>
-            <select id="max-players-select">
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="8" selected>8</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-            </select>
+            <label for="max-players-input">Joueurs max</label>
+            <input type="number" id="max-players-input" value="8" min="3" max="50" autocomplete="off">
           </div>
           <div class="form-group">
-            <label for="impostors-select">Imposteurs</label>
-            <select id="impostors-select">
-              <option value="1" selected>1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </select>
+            <label for="impostors-input">Imposteurs</label>
+            <input type="number" id="impostors-input" value="1" min="1" max="10" autocomplete="off">
           </div>
         </div>
 

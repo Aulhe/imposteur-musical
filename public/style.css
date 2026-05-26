@@ -348,6 +348,19 @@ select {
   margin-bottom: 0;
 }
 
+.settings-grid input[type="number"] {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  -moz-appearance: textfield;
+}
+
+.settings-grid input[type="number"]::-webkit-inner-spin-button,
+.settings-grid input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
 .settings-toggles {
   display: flex;
   flex-direction: column;
