@@ -156,12 +156,21 @@
   <!-- ECRAN VOTE -->
   <div id="screen-vote" class="screen">
     <div class="container">
-      <h2>🗳️ Qui est l'imposteur ?</h2>
-      <p class="vote-subtitle">Écoute les morceaux, discutez, puis votez !</p>
-      <div id="all-submissions" class="submissions-recap"></div>
+      <div class="vote-header">
+        <h2>🗳️ Qui est l'imposteur ?</h2>
+        <div id="vote-timer" class="vote-timer"></div>
+      </div>
+      <p class="vote-subtitle">Discutez entre vous puis votez !</p>
+      <div id="vote-status-bar" class="vote-status-bar">
+        <div id="vote-progress" class="vote-progress"></div>
+        <span id="vote-status" class="vote-status-text">0/0</span>
+      </div>
       <div id="vote-buttons" class="vote-buttons"></div>
-      <p id="vote-status" class="info-text"></p>
       <p id="vote-error" class="error"></p>
+      <details class="submissions-details">
+        <summary>🎵 Revoir les morceaux</summary>
+        <div id="all-submissions" class="submissions-recap"></div>
+      </details>
     </div>
   </div>
 

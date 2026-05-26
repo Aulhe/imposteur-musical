@@ -275,8 +275,9 @@ socket.on('phase-changed', (data) => {
 });
 
 socket.on('vote-cast', (data) => {
-  document.getElementById('vote-status').textContent =
-    `${data.voterCount}/${data.total} votes`;
+  const pct = Math.round((data.voterCount / data.total) * 100);
+  document.getElementById('vote-progress').style.width = pct + '%';
+  document.getElementById('vote-status').textContent = `${data.voterCount}/${data.total} votes`;
 });
 
 socket.on('round-results', (data) => {
@@ -369,8 +370,11 @@ function showVoteScreen(lobby) {
   currentPlayers.forEach((p, i) => {
     if (p.id === myId) return;
     const btn = document.createElement('button');
-    btn.className = 'btn btn-vote';
-    btn.innerHTML = `<div class="player-avatar avatar-${i % 10}" style="width:28px;height:28px;font-size:0.75rem;display:inline-flex;vertical-align:middle;margin-right:8px;">${p.name[0].toUpperCase()}</div> ${esc(p.name)}`;
+    btn.className = 'btn-vote';
+    btn.innerHTML = `
+      <div class="player-avatar avatar-${i % 10}" style="width:32px;height:32px;font-size:0.8rem;">${p.name[0].toUpperCase()}</div>
+      <span>${esc(p.name)}</span>
+    `;
     btn.addEventListener('click', () => {
       if (hasVoted) return;
       socket.emit('vote', lobbyCode, p.id, (res) => {
@@ -386,6 +390,7 @@ function showVoteScreen(lobby) {
     btnsEl.appendChild(btn);
   });
 
+  document.getElementById('vote-progress').style.width = '0%';
   document.getElementById('vote-status').textContent = '0/' + currentPlayers.length + ' votes';
   document.getElementById('vote-error').textContent = '';
 }

@@ -705,18 +705,124 @@ select {
 }
 
 /* VOTE */
+.vote-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.vote-header h2 {
+  margin-bottom: 0;
+  font-size: 1.3rem;
+}
+
+.vote-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--warning);
+}
+
 .vote-subtitle {
   text-align: center;
   color: var(--text-dim);
-  margin-bottom: 20px;
-  font-size: 0.9rem;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+}
+
+.vote-status-bar {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  height: 32px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.vote-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 20px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+.vote-status-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .vote-buttons {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 20px;
+  margin-bottom: 16px;
+}
+
+.btn-vote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.btn-vote:hover {
+  border-color: var(--primary);
+  background: var(--surface2);
+  transform: translateY(-2px);
+}
+
+.btn-vote.voted {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary)25, var(--surface));
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.btn-vote .vote-count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.submissions-details {
+  margin-top: 8px;
+}
+
+.submissions-details summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.submissions-details summary:hover {
+  color: var(--text);
+}
+
+@media (max-width: 400px) {
+  .vote-buttons {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* RESULTS */
